@@ -24,6 +24,9 @@ coverage/
 playwright-report/
 test-results/
 
+# Local working review bundles
+evidence/review/
+
 # Operating-system and editor files
 .DS_Store
 Thumbs.db

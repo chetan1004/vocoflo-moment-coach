@@ -1,0 +1,290 @@
+﻿VOCOFLO BUILD WEEK 2026 - FINAL INDEPENDENT PRE-COMMIT AUDIT
+Timestamp: 2026-07-20T17:08:12+05:30
+Expected repository: C:\Users\Black Pearl\VocoFloBuildWeek2026
+No API call is authorized.
+
+==================================================
+REPOSITORY ROOT
+==================================================
+C:/Users/Black Pearl/VocoFloBuildWeek2026
+EXIT CODE: 0
+
+==================================================
+CURRENT BRANCH
+==================================================
+main
+EXIT CODE: 0
+
+==================================================
+CURRENT HEAD
+==================================================
+HEAD: 628b0554840b2c3ba860e5574e4ebb46e6e2e32f
+Subject: chore: establish isolated Build Week repository
+Time: 2026-07-19T21:13:20+05:30
+EXIT CODE: 0
+
+==================================================
+PRE-AUDIT STATUS
+==================================================
+## main
+ M .gitignore
+ M BUILD_WEEK_LOG.md
+ M README.md
+ M docs/ARCHITECTURE_DECISIONS.md
+ M evidence/README.md
+?? .env.example
+?? eslint.config.mjs
+?? evidence/codex/
+?? evidence/live/
+?? evidence/tests/
+?? evidence/usage/
+?? next-env.d.ts
+?? next.config.ts
+?? package-lock.json
+?? package.json
+?? postcss.config.mjs
+?? src/
+?? tsconfig.json
+?? vitest.config.ts
+?? vitest.setup.ts
+EXIT CODE: 0
+
+==================================================
+STAGED PATHS
+==================================================
+NONE
+
+==================================================
+COMMIT-ELIGIBLE FILE INVENTORY
+==================================================
+Eligible file count: 41
+.env.example
+.gitignore
+AGENTS.md
+BUILD_WEEK_LOG.md
+docs/ARCHITECTURE_DECISIONS.md
+eslint.config.mjs
+evidence/codex/PRIMARY_THREAD_BOOTSTRAP_PROMPT.md
+evidence/codex/PRIMARY_THREAD_IMPLEMENTATION_SUMMARY.md
+evidence/codex/PRIMARY_THREAD_START.md
+evidence/live/LIVE_LOOP_2026-07-20.md
+evidence/README.md
+evidence/tests/LOCAL_VERIFICATION.md
+evidence/tests/PRECOMMIT_AUDIT_20260720_170812.txt
+evidence/usage/API_USAGE_2026-07-20.md
+next.config.ts
+next-env.d.ts
+package.json
+package-lock.json
+postcss.config.mjs
+README.md
+src/app/api/mission/route.test.ts
+src/app/api/mission/route.ts
+src/app/api/report/route.test.ts
+src/app/api/report/route.ts
+src/app/globals.css
+src/app/layout.tsx
+src/app/page.test.tsx
+src/app/page.tsx
+src/lib/api-errors.ts
+src/lib/coach-state.test.ts
+src/lib/coach-state.ts
+src/lib/history.test.ts
+src/lib/history.ts
+src/lib/model-output-error.ts
+src/lib/openai-client.test.ts
+src/lib/openai-client.ts
+src/lib/schemas.test.ts
+src/lib/schemas.ts
+tsconfig.json
+vitest.config.ts
+vitest.setup.ts
+
+==================================================
+FORBIDDEN PATH CHECK
+==================================================
+Forbidden eligible-path count: 0
+
+==================================================
+LARGE FILE CHECK
+==================================================
+Eligible files larger than 5 MB: 0
+
+==================================================
+IGNORE PROOF
+==================================================
+.gitignore:13:.env.*	.env.local
+.gitignore:28:evidence/review/	evidence/review/FAILED_PRECOMMIT_AUDIT_20260720_170058.txt
+.gitignore:28:evidence/review/	evidence/review/FAILED_PRECOMMIT_AUDIT_20260720_170418.txt
+Tracked .env.local path count: 0
+
+==================================================
+TEXT FILE INVENTORY
+==================================================
+Text files selected for scanning: 41
+
+==================================================
+SECRET-SHAPED VALUE SCAN
+==================================================
+Secret-shaped match count: 0
+
+==================================================
+GIT DIFF CHECK
+==================================================
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'BUILD_WEEK_LOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/ARCHITECTURE_DECISIONS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evidence/README.md', LF will be replaced by CRLF the next time Git touches it
+EXIT CODE: 0
+
+==================================================
+LINT
+==================================================
+
+> vocoflo-moment-coach@0.1.0 lint
+> eslint .
+
+EXIT CODE: 0
+
+==================================================
+TESTS
+==================================================
+
+> vocoflo-moment-coach@0.1.0 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mC:/Users/Black Pearl/VocoFloBuildWeek2026[39m
+
+ [32mΓ£ô[39m src/lib/coach-state.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/schemas.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/history.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m src/app/api/report/route.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32mΓ£ô[39m src/app/api/mission/route.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+[90mstderr[2m | src/lib/openai-client.test.ts[2m > [22m[2mOpenAI prompt builders[2m > [22m[2mclassifies missing structured output as a model output error
+[22m[39mmodel_output_error { category: [32m'missing_output_text'[39m, issues: [90mundefined[39m }
+System.Management.Automation.RemoteException
+[90mstderr[2m | src/lib/openai-client.test.ts[2m > [22m[2mOpenAI prompt builders[2m > [22m[2mclassifies malformed model JSON as a model output error
+[22m[39mmodel_output_error { category: [32m'invalid_json'[39m, issues: [90mundefined[39m }
+System.Management.Automation.RemoteException
+[90mstderr[2m | src/lib/openai-client.test.ts[2m > [22m[2mOpenAI prompt builders[2m > [22m[2mclassifies response schema drift as a model output error
+[22m[39mmodel_output_error {
+  category: [32m'schema_validation'[39m,
+  issues: [ { path: [36m[Array][39m, code: [32m'too_big'[39m } ]
+}
+System.Management.Automation.RemoteException
+[90mstderr[2m | src/lib/openai-client.test.ts[2m > [22m[2mOpenAI prompt builders[2m > [22m[2mreturns parsed data when structured output matches the schema
+[22m[39mmodel_output_error {
+  category: [32m'schema_validation'[39m,
+  issues: [ { path: [36m[Array][39m, code: [32m'invalid_literal'[39m } ]
+}
+System.Management.Automation.RemoteException
+ [32mΓ£ô[39m src/lib/openai-client.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32mΓ£ô[39m src/app/page.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 3896[2mms[22m[39m
+   [33m[2mΓ£ô[22m[39m Moment Coach UI[2m > [22mcompletes one representative coaching loop and saves local history [33m 2655[2mms[22m[39m
+   [33m[2mΓ£ô[22m[39m Moment Coach UI[2m > [22mshows recoverable API errors [33m 1240[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 17:08:21
+[2m   Duration [22m 6.94s[2m (transform 427ms, setup 2.09s, collect 1.58s, tests 4.00s, environment 10.31s, prepare 1.88s)[22m
+
+EXIT CODE: 0
+
+==================================================
+PRODUCTION BUILD
+==================================================
+
+> vocoflo-moment-coach@0.1.0 build
+> next build
+
+   Γû▓ Next.js 15.5.20
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully in 1557ms
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/6) ...
+   Generating static pages (1/6)
+   Generating static pages (2/6)
+   Generating static pages (4/6)
+ Γ£ô Generating static pages (6/6)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+Γöî Γùï /                                    16.4 kB         119 kB
+Γö£ Γùï /_not-found                            995 B         103 kB
+Γö£ ╞Æ /api/mission                           127 B         103 kB
+Γöö ╞Æ /api/report                            127 B         103 kB
++ First Load JS shared by all             102 kB
+  Γö£ chunks/255-3981a3d1f3561bd8.js       46.2 kB
+  Γö£ chunks/4bd1b696-c023c6e3521b1417.js  54.2 kB
+  Γöö other shared chunks (total)          1.97 kB
+
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+
+EXIT CODE: 0
+
+==================================================
+POST-BUILD SECRET-SHAPED VALUE SCAN
+==================================================
+Post-build secret-shaped match count: 0
+
+==================================================
+POST-AUDIT STATUS
+==================================================
+## main
+ M .gitignore
+ M BUILD_WEEK_LOG.md
+ M README.md
+ M docs/ARCHITECTURE_DECISIONS.md
+ M evidence/README.md
+?? .env.example
+?? eslint.config.mjs
+?? evidence/codex/
+?? evidence/live/
+?? evidence/tests/
+?? evidence/usage/
+?? next-env.d.ts
+?? next.config.ts
+?? package-lock.json
+?? package.json
+?? postcss.config.mjs
+?? src/
+?? tsconfig.json
+?? vitest.config.ts
+?? vitest.setup.ts
+
+==================================================
+POST-AUDIT STAGED PATHS
+==================================================
+NONE
+
+==================================================
+TRACKED DIFF STATISTICS
+==================================================
+ .gitignore                     |   3 +
+ BUILD_WEEK_LOG.md              |  58 ++++++++++++++++++++
+ README.md                      | 122 ++++++++++++++++++++++++++++++++---------
+ docs/ARCHITECTURE_DECISIONS.md |  68 ++++++++++++++++++++---
+ evidence/README.md             |   6 ++
+ 5 files changed, 223 insertions(+), 34 deletions(-)
+
+==================================================
+FINAL RESULT
+==================================================
+PRE-COMMIT AUDIT COMPLETE
+No secret-shaped values found.
+No forbidden paths eligible for commit.
+No unexpected large files found.
+Lint passed.
+Tests passed: 7 files, 26 tests.
+Production build passed.
+Nothing staged.
+No API call made.
+Bundle: C:\Users\Black Pearl\VocoFloBuildWeek2026\evidence\tests\PRECOMMIT_AUDIT_20260720_170812.txt
