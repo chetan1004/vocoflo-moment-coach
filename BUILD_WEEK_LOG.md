@@ -98,6 +98,7 @@ All times are recorded in India Standard Time unless otherwise stated.
 - Local history now stores the complete mission thread as one record and remains compatible with older one-report records.
 - Updated tests for response caps, continuation controls, start-new behavior, single-record thread storage, older-history compatibility, continuation prompt context, unrelated-content constraint, and rendered text without user-facing "experiment" wording.
 - Homepage now carries one unified direction section, moves Mission history below it, declares the bounded mission limit, adds GPT-5.6/Codex attribution, and distinguishes GPT-5.6's adaptive reasoning and language from VocoFlo's bounded coaching method, evidence rules, response limits, and direction.
+- Added a simple temporary V favicon for browser-tab and demo polish.
 - No live OpenAI API call occurred during this amendment checkpoint.
 - No deployment occurred.
 - The amended build still requires final redeployment and public smoke testing.
