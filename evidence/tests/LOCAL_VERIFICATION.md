@@ -1,6 +1,6 @@
 # Local Verification
 
-Timestamp: 2026-07-20T16:45:40+05:30
+Timestamp: 2026-07-20T20:09:11+05:30
 
 ## Environment notes
 
@@ -35,7 +35,7 @@ Result: passed.
 
 ```text
 Test Files  7 passed (7)
-Tests       26 passed (26)
+Tests       38 passed (38)
 ```
 
 Coverage by test intent:
@@ -55,6 +55,13 @@ Coverage by test intent:
 - Report-context continuity from original situation into report-back prompt
 - Synchronized Zod and Structured Output limits
 - Model-output failure classification for schema drift, malformed JSON, and missing output text
+- One mission plus no more than three report or continuation responses
+- Continue/start-new controls across non-final and final states
+- Single localStorage record for a complete mission thread
+- Older localStorage history compatibility
+- Prior same-mission context in continuation prompt construction
+- Unrelated continuation constraint back to the active mission
+- No user-facing rendered "experiment" text
 
 ### `npm run build`
 
@@ -75,5 +82,6 @@ Result: passed.
 - Report-context continuity correction was validated without a live API call.
 - Model-output validation classification fix was validated without another live API call.
 - Complete live report loop is verified after retry.
-- Deployment evidence is pending because no public deployment was authorized.
-- Public demo/submission evidence remains pending; live local loop evidence is recorded in `evidence/live/LIVE_LOOP_2026-07-20.md`.
+- The earlier verified commit was deployed and publicly smoke-tested.
+- The bounded-continuity amended implementation has local lint/test/build validation only; final redeployment and public smoke testing remain pending.
+- Bounded continuity amendment was validated without a live API call.

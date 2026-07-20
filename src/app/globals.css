@@ -127,6 +127,30 @@ h2 {
   padding-left: 20px;
 }
 
+.response-count {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.thread {
+  display: grid;
+  gap: 12px;
+}
+
+.thread-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+button.secondary {
+  background: #31504c;
+}
+
 .feature-grid li,
 .result li {
   margin: 8px 0;

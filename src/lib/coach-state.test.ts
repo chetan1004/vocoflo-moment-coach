@@ -23,15 +23,25 @@ describe("coach state progression", () => {
     const missionState = missionReady(situation, mission);
     expect(missionState.kind).toBe("mission");
 
-    const loadingReflection = { ...missionState, kind: "loadingReflection" as const, report: "I said the name first." };
-    const reflectionState = reflectionReady(loadingReflection, {
-      observedEvidence: ["You said the name first."],
-      usefulInterpretation: "The opening action happened.",
-      nextStep: "Use the same opening sentence in the next demo.",
-      closing: "That is one concrete data point."
-    });
+    const loadingReflection = {
+      ...missionState,
+      kind: "loadingReflection" as const,
+      userText: "I said the name first.",
+      exchanges: [],
+      historyId: "history-1"
+    };
+    const reflectionState = reflectionReady(
+      loadingReflection,
+      {
+        observedEvidence: ["You said the name first."],
+        usefulInterpretation: "The opening action happened.",
+        nextStep: "Use the same opening sentence in the next demo.",
+        closing: "That is one concrete data point."
+      },
+      "history-1"
+    );
 
     expect(reflectionState.kind).toBe("reflection");
-    expect(reflectionState.report).toBe("I said the name first.");
+    expect(reflectionState.exchanges[0].userText).toBe("I said the name first.");
   });
 });

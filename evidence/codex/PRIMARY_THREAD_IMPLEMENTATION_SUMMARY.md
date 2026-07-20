@@ -1,6 +1,6 @@
 # Primary Thread Implementation Summary
 
-Timestamp: 2026-07-20T16:45:40+05:30
+Timestamp: 2026-07-20T20:09:11+05:30
 
 ## Architecture selected
 
@@ -29,11 +29,14 @@ Timestamp: 2026-07-20T16:45:40+05:30
 - Educational coaching disclaimer with no medical, diagnostic, treatment, therapy, cure, or fluency-removal claims
 - Prominent audience statement for people who stutter
 - Restrained "How this coach works" method explanation
-- Prompt guardrails for one real-world evidence experiment, one primary evidence lens, no technique stacking, no invented progress, no invented evidence, and exactly one next experiment
+- Prompt guardrails for one real-world evidence mission, one primary evidence lens, no technique stacking, no invented progress, no invented evidence, and exactly one next guided step or question
 - Report-context continuity so report-back prompts receive the original situation, audience, stated difficulty or fear, timing, mission focus, mission framing, evidence target, and actual report
 - Shared mission/reflection output limits reused by Zod response schemas and Structured Output JSON schemas
 - Separate model-output failure classification so schema drift, malformed JSON, and missing output text are not returned as user form errors
 - Complete live loop verified after successful report retry
+- Founder-approved bounded continuity amendment: one mission response plus up to three report or continuation responses
+- Single active mission thread with chronological user and coach exchanges
+- Local history stores each mission thread as one record and migrates older one-report records safely
 
 ## Files created
 
@@ -99,6 +102,8 @@ Timestamp: 2026-07-20T16:45:40+05:30
 - The retry completed successfully.
 - The completed loop appeared in local browser history.
 - The complete live loop is now verified.
+- Public smoke testing showed one report could end the coaching moment too abruptly; a bounded continuity amendment was implemented after founder approval.
+- The amendment remains bounded and is not open-ended chat.
 
 ## Usage evidence
 
@@ -119,7 +124,9 @@ The dashboard showed five requests although three user-triggered submissions wer
 - This documentation closure checkpoint did not call OpenAI.
 - During the documentation closure checkpoint, `.env.local` was not opened, read, printed, modified, or exposed. Earlier in the project, a project-scoped OpenAI API key was created and stored only in the Git-ignored `.env.local` file.
 - No key value appears in evidence, source control, screenshots, or browser-delivered files.
-- No deployment, external account, public resource, staging, or Git commit was created.
+- Earlier in Build Week, source commit `96f7672` was deployed to Vercel project `vocoflo-moment-coach` at https://vocoflo-moment-coach.vercel.app with status Ready.
+- During the bounded-continuity amendment checkpoint, no deployment, staging, Git commit, push, external account, or new public resource was created.
+- No live OpenAI API call occurred during the bounded continuity amendment checkpoint.
 - No historical prompt or main-project implementation was copied.
 - No main VocoFlo repository, file, database, documentation, or project knowledge was inspected.
 
@@ -133,4 +140,4 @@ The dashboard showed five requests although three user-triggered submissions wer
 - Live coaching requires a server-side `OPENAI_API_KEY` in local or deployment environment configuration.
 - History is intentionally browser-local and can be cleared by browser storage settings.
 - The beta is text-only and does not include speech recording, speech-event analysis, accounts, payments, analytics, or long-term personalization.
-- Deployment remains pending.
+- The currently public deployment is the earlier verified build; the bounded-continuity amended build still requires final redeployment and public smoke testing.

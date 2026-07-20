@@ -10,7 +10,13 @@ export async function POST(request: Request) {
     }
 
     const input = parsed.data;
-    const reflection = await generateReflection(input.situation, input.mission, input.report);
+    const reflection = await generateReflection(
+      input.situation,
+      input.mission,
+      input.report,
+      input.previousResponses,
+      input.responseNumber
+    );
     return Response.json({ reflection });
   } catch (error) {
     return safeApiError(error);

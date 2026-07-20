@@ -32,7 +32,13 @@ describe("report route", () => {
     const response = await POST(
       new Request("http://localhost/api/report", {
         method: "POST",
-        body: JSON.stringify({ situation, mission, report: "I asked the question before explaining why." })
+        body: JSON.stringify({
+          situation,
+          mission,
+          report: "I asked the question before explaining why.",
+          previousResponses: [],
+          responseNumber: 1
+        })
       })
     );
 
@@ -40,7 +46,9 @@ describe("report route", () => {
     expect(generateReflection).toHaveBeenCalledWith(
       situation,
       mission,
-      "I asked the question before explaining why."
+      "I asked the question before explaining why.",
+      [],
+      1
     );
     await expect(response.json()).resolves.toMatchObject({
       reflection: { nextStep: "Ask one question early in the next meeting." }
@@ -51,7 +59,7 @@ describe("report route", () => {
     const response = await POST(
       new Request("http://localhost/api/report", {
         method: "POST",
-        body: JSON.stringify({ situation, mission, report: "" })
+        body: JSON.stringify({ situation, mission, report: "", previousResponses: [], responseNumber: 1 })
       })
     );
 
@@ -65,7 +73,7 @@ describe("report route", () => {
     const response = await POST(
       new Request("http://localhost/api/report", {
         method: "POST",
-        body: JSON.stringify({ situation, mission, report: "" })
+        body: JSON.stringify({ situation, mission, report: "", previousResponses: [], responseNumber: 1 })
       })
     );
 
@@ -81,7 +89,13 @@ describe("report route", () => {
     const response = await POST(
       new Request("http://localhost/api/report", {
         method: "POST",
-        body: JSON.stringify({ situation, mission, report: "I asked the question and my lead answered." })
+        body: JSON.stringify({
+          situation,
+          mission,
+          report: "I asked the question and my lead answered.",
+          previousResponses: [],
+          responseNumber: 1
+        })
       })
     );
 
@@ -97,7 +111,13 @@ describe("report route", () => {
     const response = await POST(
       new Request("http://localhost/api/report", {
         method: "POST",
-        body: JSON.stringify({ situation, mission, report: "I asked the question and my lead answered." })
+        body: JSON.stringify({
+          situation,
+          mission,
+          report: "I asked the question and my lead answered.",
+          previousResponses: [],
+          responseNumber: 1
+        })
       })
     );
 
@@ -113,7 +133,13 @@ describe("report route", () => {
     const response = await POST(
       new Request("http://localhost/api/report", {
         method: "POST",
-        body: JSON.stringify({ situation, mission, report: "I asked the question and my lead answered." })
+        body: JSON.stringify({
+          situation,
+          mission,
+          report: "I asked the question and my lead answered.",
+          previousResponses: [],
+          responseNumber: 1
+        })
       })
     );
 
@@ -121,5 +147,66 @@ describe("report route", () => {
     await expect(response.json()).resolves.toEqual({
       error: "The coaching service returned an invalid response. Please try again."
     });
+  });
+
+  it("rejects a report response beyond the bounded mission limit", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/report", {
+        method: "POST",
+        body: JSON.stringify({
+          situation,
+          mission,
+          report: "I have one more thought.",
+          previousResponses: [],
+          responseNumber: 4
+        })
+      })
+    );
+
+    expect(response.status).toBe(400);
+  });
+
+  it("rejects response number 2 with zero previous responses", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/report", {
+        method: "POST",
+        body: JSON.stringify({
+          situation,
+          mission,
+          report: "I want to clarify.",
+          previousResponses: [],
+          responseNumber: 2
+        })
+      })
+    );
+
+    expect(response.status).toBe(400);
+  });
+
+  it("rejects response number 1 with one previous response", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/report", {
+        method: "POST",
+        body: JSON.stringify({
+          situation,
+          mission,
+          report: "I want to clarify.",
+          previousResponses: [
+            {
+              userText: "I asked the question.",
+              coachResponse: {
+                observedEvidence: ["You asked the question."],
+                usefulInterpretation: "The report shows the question happened.",
+                nextStep: "Ask one direct question in the next meeting.",
+                closing: "Stay with the direct observation."
+              }
+            }
+          ],
+          responseNumber: 1
+        })
+      })
+    );
+
+    expect(response.status).toBe(400);
   });
 });

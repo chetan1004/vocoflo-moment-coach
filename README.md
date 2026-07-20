@@ -11,9 +11,12 @@ This repository implements exactly one complete Moment Coach loop:
 1. The user describes an upcoming speaking situation.
 2. A server-side OpenAI Responses API call generates one GPT-5.6 bounded evidence mission.
 3. The user reports what happened after the moment.
-4. A second server-side OpenAI Responses API call extracts concrete evidence from the report.
-5. The app returns one bounded next step.
-6. The browser saves the completed loop in localStorage history.
+4. GPT-5.6 extracts concrete evidence, interpretation, and one next step.
+5. The user may continue the same mission with clarification, disagreement, a missing fact, or another relevant observation.
+6. One active mission is bounded to one mission response plus up to three report or continuation responses.
+7. The browser saves the mission thread in localStorage history.
+
+One bounded mission uses 2 to 4 GPT-5.6 requests: 1 mission-generation request plus 1 to 3 report or continuation requests.
 
 This is educational speaking coaching only. It does not diagnose, treat, cure, record speech, or medically assess any condition.
 
@@ -23,9 +26,10 @@ This is educational speaking coaching only. It does not diagnose, treat, cure, r
 - One AI-generated real-world evidence mission
 - Report-back evidence extraction
 - One next step
+- Bounded same-mission continuation, capped at three report or continuation responses
 - Simple local browser history
 - Recoverable validation and API error states
-- Visible explanation of the one-experiment report-back method
+- Visible explanation of the one-mission report-back method
 
 ## Planned for the larger VocoFlo product
 
@@ -37,9 +41,9 @@ Those planned capabilities are not implemented in this beta.
 
 ## Coaching Method
 
-VocoFlo supplies GPT-5.6 with a defined coaching method. The coach identifies one relevant speaking habit, such as checking, restarting, avoiding, or controlling, selects one evidence lens, and turns it into one bounded real-world experiment.
+VocoFlo supplies GPT-5.6 with a defined coaching method. The coach identifies one relevant speaking habit, such as checking, restarting, avoiding, or controlling, selects one evidence lens, and turns it into one bounded real-world mission.
 
-This beta contains a compact authored coaching method for the Moment Coach loop, not the complete VocoFlo learning program.
+This beta contains a compact authored coaching method for the Moment Coach loop, not the complete VocoFlo learning program. Continuation is bounded to the same active mission and is not open-ended chat.
 
 ## Architecture Summary
 
@@ -103,7 +107,7 @@ Pre-existing VocoFlo work that must be disclosed in final submission:
 - The VocoFlo name and broader product vision
 - Product research about speaking and stammering
 - Historical coaching concepts and product philosophy
-- Earlier prompts and coaching experiments
+- Earlier prompts and coaching trials
 - The underlying VocoFlo direction and later larger-method "watcher" concept
 - Existing mobile, backend, detection-model, and documentation work outside this repository
 
@@ -111,10 +115,12 @@ Build Week work in this repository includes the responsive web beta, API route i
 
 ## Deployment
 
-Pending. No external deployment or public resource has been created yet.
+Production URL: https://vocoflo-moment-coach.vercel.app
+
+The currently public deployment is the earlier verified build. The bounded-continuity amended build still requires final redeployment.
 
 ## Demo
 
 Local live loop: verified GREEN after repair. The first live mission call succeeded, the first live report call failed locally after model-output validation, and the repaired report retry succeeded. The completed loop saved in browser-local history.
 
-Public smoke test: pending until deployment.
+Public smoke testing for the amended build remains pending until final redeployment.

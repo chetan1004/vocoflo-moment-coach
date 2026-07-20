@@ -30,12 +30,17 @@ describe("local history", () => {
   });
 
   it("saves completed loops and reads them back", () => {
-    const entry = buildHistoryEntry({ situation, mission, report: "I asked it first.", reflection });
+    const entry = buildHistoryEntry({
+      situation,
+      mission,
+      thread: [{ id: "exchange-1", createdAt: new Date().toISOString(), userText: "I asked it first.", coachResponse: reflection }]
+    });
 
     saveCompletedLoop(entry);
 
     expect(readHistory()).toHaveLength(1);
     expect(readHistory()[0].mission.title).toBe("Ask once");
+    expect(readHistory()[0].thread).toHaveLength(1);
   });
 
   it("recovers safely from malformed stored data", () => {
@@ -45,10 +50,56 @@ describe("local history", () => {
   });
 
   it("clears history", () => {
-    saveCompletedLoop(buildHistoryEntry({ situation, mission, report: "I asked it first.", reflection }));
+    saveCompletedLoop(
+      buildHistoryEntry({
+        situation,
+        mission,
+        thread: [{ id: "exchange-1", createdAt: new Date().toISOString(), userText: "I asked it first.", coachResponse: reflection }]
+      })
+    );
 
     clearHistory();
 
     expect(readHistory()).toEqual([]);
+  });
+
+  it("keeps older one-report history records readable", () => {
+    const legacyRecord = {
+      id: "legacy-1",
+      createdAt: new Date().toISOString(),
+      situationSummary: situation.situation,
+      situation,
+      mission,
+      report: "I asked it first.",
+      reflection
+    };
+    localStorage.setItem("vocoflo.momentCoach.history.v1", JSON.stringify([legacyRecord]));
+
+    const [entry] = readHistory();
+
+    expect(entry.thread[0].userText).toBe("I asked it first.");
+    expect(entry.responseCount).toBe(1);
+    expect(entry.endedReason).toBe("user_started_new");
+  });
+
+  it("updates the same history record as a mission continues", () => {
+    const first = buildHistoryEntry({
+      situation,
+      mission,
+      thread: [{ id: "exchange-1", createdAt: new Date().toISOString(), userText: "I asked it first.", coachResponse: reflection }]
+    });
+    saveCompletedLoop(first);
+
+    saveCompletedLoop({
+      ...first,
+      thread: [
+        ...first.thread,
+        { id: "exchange-2", createdAt: new Date().toISOString(), userText: "I added a correction.", coachResponse: reflection }
+      ],
+      responseCount: 2
+    });
+
+    expect(readHistory()).toHaveLength(1);
+    expect(readHistory()[0].thread).toHaveLength(2);
   });
 });

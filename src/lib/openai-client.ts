@@ -5,6 +5,7 @@ import {
   reflectionSchema,
   stringLimits,
   type Mission,
+  type ReportExchange,
   type Reflection,
   type SituationRequest
 } from "./schemas";
@@ -29,7 +30,7 @@ export const missionJsonSchema: JsonSchema = {
     additionalProperties: false,
     required: ["title", "mission", "focus", "successSignal", "framing"],
     properties: {
-      title: stringProperty("Brief name for the single evidence experiment.", stringLimits.mission.titleMax),
+      title: stringProperty("Brief name for the single evidence mission.", stringLimits.mission.titleMax),
       mission: stringProperty("One concrete real-world action, not multiple techniques.", stringLimits.mission.missionMax),
       focus: stringProperty("The one evidence lens being tested.", stringLimits.mission.focusMax),
       successSignal: stringProperty("Observable evidence the user should notice.", stringLimits.mission.successSignalMax),
@@ -57,7 +58,7 @@ export const reflectionJsonSchema: JsonSchema = {
         stringLimits.reflection.usefulInterpretationMax
       ),
       nextStep: stringProperty(
-        "Exactly one concise next real-world experiment.",
+        "Exactly one concise next response following the current bounded-turn instructions.",
         stringLimits.reflection.nextStepMax
       ),
       closing: stringProperty("Brief closing limited to what was reported.", stringLimits.reflection.closingMax)
@@ -83,7 +84,7 @@ export function buildMissionInput(input: SituationRequest): ChatInput {
       role: "system",
       content: [
         "You are VocoFlo Moment Coach, an educational speaking coach for real-world speaking moments.",
-        "Create exactly one realistic real-world evidence experiment, not a list of techniques.",
+        "Create exactly one realistic real-world evidence mission, not a list of techniques.",
         "Choose one primary evidence lens from: prediction versus actual outcome; listener response; continuing after difficulty; speaking without restarting or correcting; returning attention to meaning or connection; acting despite the urge to avoid; noticing pressure to check or control; recognising that the object of checking changes while the checking movement repeats.",
         "Do not stack techniques, do not prescribe multiple missions, and do not turn the response into a course.",
         "Clearly state what observable evidence the user should notice during or after the moment.",
@@ -106,26 +107,47 @@ export function buildMissionInput(input: SituationRequest): ChatInput {
   ];
 }
 
-export function buildReportInput(situation: SituationRequest, mission: Mission, report: string): ChatInput {
+export function buildReportInput(
+  situation: SituationRequest,
+  mission: Mission,
+  report: string,
+  previousResponses: ReportExchange[] = [],
+  responseNumber = previousResponses.length + 1
+): ChatInput {
+  const finalResponse = responseNumber >= 3;
+  const nextStepInstruction = finalResponse
+    ? "For final report response number 3, nextStep must contain exactly one concrete next guided step and must not be a question."
+    : "For report response numbers 1 and 2, nextStep may contain exactly one concise guided step or one useful same-mission question.";
+  const closingInstruction = finalResponse
+    ? "For final report response number 3, closing should briefly acknowledge that the bounded mission thread is complete without claiming progress."
+    : "For report response numbers 1 and 2, closing must be brief.";
+
   return [
     {
       role: "system",
       content: [
-        "You are VocoFlo Moment Coach, an educational speaking coach for report-back after a real-world speaking experiment.",
+        "You are VocoFlo Moment Coach, an educational speaking coach for report-back and bounded continuation after a real-world speaking mission.",
+        "Help the user become less governed by checking, predicting, controlling, correcting, avoiding, and reacting to speech.",
         "Use only what the user actually reported.",
+        "Preserve relevant prior context from the same mission.",
         "Extract direct observations before interpretation and separate facts from fear, prediction, or interpretation.",
         "Treat the original difficulty as the user's earlier fear, prediction, or concern, not as a fact about what happened.",
         "Compare prediction with reality only when the user supplied enough information to support that comparison.",
         "Compare the original difficulty with reality only when the actual report contains enough direct evidence.",
         "Use listener evidence or continuation evidence when present.",
+        "Respond to clarification or disagreement instead of repeating a prior conclusion.",
+        "Reject or redirect unrelated continuation content back to the active speaking mission.",
         "Do not praise mere completion as proof of progress.",
         "Do not invent evidence, progress, feelings, listener reactions, courage, readiness, or success.",
-        "Give exactly one next real-world experiment.",
+        nextStepInstruction,
+        "Do not become a general-purpose chatbot.",
         "Avoid diagnosis, treatment, therapy, cure, assessment, fluency-removal, or medical claims.",
         "observedEvidence must contain one to three short direct facts.",
         "usefulInterpretation must remain cautious and concise.",
-        "nextStep must contain exactly one concise experiment.",
-        "closing must be brief.",
+        finalResponse
+          ? "nextStep must not end with a question mark and must not ask the user a question."
+          : "nextStep may be one useful same-mission question when that is more useful than a guided step.",
+        closingInstruction,
         "Return only valid JSON with observedEvidence, usefulInterpretation, nextStep, and closing."
       ].join(" ")
     },
@@ -141,6 +163,21 @@ export function buildReportInput(situation: SituationRequest, mission: Mission, 
         `Mission focus: ${mission.focus}`,
         `Mission framing: ${mission.framing}`,
         `Evidence target: ${mission.successSignal}`,
+        `Current report or continuation response number: ${responseNumber} of 3`,
+        previousResponses.length > 0
+          ? `Prior same-mission exchanges:\n${previousResponses
+              .map(
+                (exchange, index) =>
+                  [
+                    `Exchange ${index + 1} user: ${exchange.userText}`,
+                    `Exchange ${index + 1} coach observed evidence: ${exchange.coachResponse.observedEvidence.join(" | ")}`,
+                    `Exchange ${index + 1} coach interpretation: ${exchange.coachResponse.usefulInterpretation}`,
+                    `Exchange ${index + 1} coach next step: ${exchange.coachResponse.nextStep}`,
+                    `Exchange ${index + 1} coach closing: ${exchange.coachResponse.closing}`
+                  ].join("\n")
+              )
+              .join("\n")}`
+          : "Prior same-mission exchanges: none",
         `Actual user report: ${report}`
       ].join("\n")
     }
@@ -168,12 +205,14 @@ export async function generateReflection(
   situation: SituationRequest,
   mission: Mission,
   report: string,
+  previousResponses: ReportExchange[] = [],
+  responseNumber = previousResponses.length + 1,
   client = getOpenAIClient()
 ): Promise<Reflection> {
   const response = await client.create({
     model: process.env.OPENAI_MODEL || "gpt-5.6",
     max_output_tokens: 650,
-    input: buildReportInput(situation, mission, report),
+    input: buildReportInput(situation, mission, report, previousResponses, responseNumber),
     text: {
       format: {
         type: "json_schema",

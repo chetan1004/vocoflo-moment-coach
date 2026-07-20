@@ -41,12 +41,6 @@ export const missionSchema = z.object({
   framing: trimmedString("Supportive framing", stringLimits.mission.framingMax)
 });
 
-export const reportRequestSchema = z.object({
-  situation: situationRequestSchema,
-  mission: missionSchema,
-  report: trimmedString("Report-back", 900)
-});
-
 export const reflectionSchema = z.object({
   observedEvidence: z
     .array(trimmedString("Observed evidence", stringLimits.reflection.observedEvidenceItemMax))
@@ -57,11 +51,46 @@ export const reflectionSchema = z.object({
   closing: trimmedString("Supportive closing", stringLimits.reflection.closingMax)
 });
 
+export const reportExchangeSchema = z.object({
+  userText: trimmedString("Report or continuation", 900),
+  coachResponse: reflectionSchema
+});
+
 export const errorResponseSchema = z.object({
   error: z.string()
 });
 
 export type SituationRequest = z.infer<typeof situationRequestSchema>;
 export type Mission = z.infer<typeof missionSchema>;
-export type ReportRequest = z.infer<typeof reportRequestSchema>;
 export type Reflection = z.infer<typeof reflectionSchema>;
+export type ReportExchange = z.infer<typeof reportExchangeSchema>;
+
+export const missionThreadLimits = {
+  missionResponseCount: 1,
+  maxReportResponses: 3,
+  maxTotalResponses: 4
+} as const;
+
+export const reportRequestSchema = z
+  .object({
+    situation: situationRequestSchema,
+    mission: missionSchema,
+    report: trimmedString("Report-back", 900),
+    previousResponses: z.array(reportExchangeSchema).max(missionThreadLimits.maxReportResponses - 1).default([]),
+    responseNumber: z
+      .number()
+      .int()
+      .min(1)
+      .max(missionThreadLimits.maxReportResponses)
+  })
+  .superRefine((value, context) => {
+    if (value.responseNumber !== value.previousResponses.length + 1) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["responseNumber"],
+        message: "Report response count is invalid."
+      });
+    }
+  });
+
+export type ReportRequest = z.infer<typeof reportRequestSchema>;

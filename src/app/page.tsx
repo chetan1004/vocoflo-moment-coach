@@ -2,8 +2,9 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { buildHistoryEntry, clearHistory, readHistory, saveCompletedLoop, type HistoryEntry } from "@/lib/history";
-import { initialCoachStep, missionReady, reflectionReady, type CoachStep } from "@/lib/coach-state";
+import { buildCoachExchange, initialCoachStep, missionReady, type CoachExchange, type CoachStep } from "@/lib/coach-state";
 import type { Mission, Reflection, SituationRequest } from "@/lib/schemas";
+import { missionThreadLimits } from "@/lib/schemas";
 
 type SituationForm = SituationRequest;
 
@@ -25,8 +26,8 @@ export default function Home() {
     setHistory(readHistory());
   }, []);
 
-  const canReport = step.kind === "mission" || step.kind === "loadingReflection";
-  const completed = step.kind === "reflection";
+  const canContinue = step.kind === "reflection" && step.exchanges.length < missionThreadLimits.maxReportResponses;
+  const finalResponse = step.kind === "reflection" && step.exchanges.length >= missionThreadLimits.maxReportResponses;
 
   async function handleMissionSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,7 +53,7 @@ export default function Home() {
 
   async function handleReportSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (step.kind !== "mission") {
+    if (step.kind !== "mission" && step.kind !== "continuation") {
       return;
     }
 
@@ -61,31 +62,44 @@ export default function Home() {
       kind: "loadingReflection",
       situation: step.situation,
       mission: step.mission,
-      report
+      exchanges: step.exchanges,
+      userText: report,
+      historyId: step.historyId
     };
     setStep(loadingState);
 
     try {
+      const responseNumber = step.exchanges.length + 1;
       const response = await fetch("/api/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ situation: step.situation, mission: step.mission, report })
+        body: JSON.stringify({
+          situation: step.situation,
+          mission: step.mission,
+          report,
+          previousResponses: step.exchanges.map(({ userText, coachResponse }) => ({ userText, coachResponse })),
+          responseNumber
+        })
       });
       const payload = await response.json();
       if (!response.ok) {
         throw new Error(payload.error || "Unable to review your report.");
       }
 
-      const nextState = reflectionReady(loadingState, payload.reflection as Reflection);
+      const nextExchange = buildCoachExchange(report, payload.reflection as Reflection);
+      const exchanges = [...step.exchanges, nextExchange];
+      const endedReason = exchanges.length >= missionThreadLimits.maxReportResponses ? "max_responses" : undefined;
+      const historyId = persistThread(step.situation, step.mission, exchanges, endedReason, step.historyId);
+      const nextState: Extract<CoachStep, { kind: "reflection" }> = {
+        kind: "reflection",
+        situation: step.situation,
+        mission: step.mission,
+        exchanges,
+        historyId,
+        endedReason
+      };
       setStep(nextState);
-      const entry = buildHistoryEntry({
-        situation: nextState.situation,
-        mission: nextState.mission,
-        report: nextState.report,
-        reflection: nextState.reflection
-      });
-      saveCompletedLoop(entry);
-      setHistory(readHistory());
+      setReport("");
     } catch (reportError) {
       setStep(step);
       setError(reportError instanceof Error ? reportError.message : "Unable to review your report.");
@@ -93,10 +107,64 @@ export default function Home() {
   }
 
   function startAgain() {
+    if (step.kind === "mission" || step.kind === "continuation" || step.kind === "reflection") {
+      persistThread(
+        step.situation,
+        step.mission,
+        step.exchanges,
+        step.kind === "reflection" && step.endedReason ? step.endedReason : "user_started_new",
+        step.historyId
+      );
+    }
     setStep(initialCoachStep);
     setSituation(emptySituation);
     setReport("");
     setError("");
+  }
+
+  function continueMission() {
+    if (step.kind !== "reflection" || step.exchanges.length >= missionThreadLimits.maxReportResponses) {
+      return;
+    }
+
+    setReport("");
+    setError("");
+    setStep({
+      kind: "continuation",
+      situation: step.situation,
+      mission: step.mission,
+      exchanges: step.exchanges,
+      historyId: step.historyId
+    });
+  }
+
+  function persistThread(
+    threadSituation: SituationRequest,
+    threadMission: Mission,
+    exchanges: CoachExchange[],
+    endedReason?: "max_responses" | "user_started_new",
+    historyId?: string
+  ) {
+    const existing = historyId ? readHistory().find((entry) => entry.id === historyId) : undefined;
+    const entry: HistoryEntry = existing
+      ? {
+          ...existing,
+          situation: threadSituation,
+          mission: threadMission,
+          thread: exchanges,
+          responseCount: exchanges.length,
+          endedReason
+        }
+      : buildHistoryEntry({
+          situation: threadSituation,
+          mission: threadMission,
+          thread: exchanges,
+          endedReason
+        });
+
+    saveCompletedLoop(entry);
+    setHistory(readHistory());
+    return entry.id;
   }
 
   function handleClearHistory() {
@@ -138,21 +206,41 @@ export default function Home() {
             />
           )}
 
-          {(step.kind === "mission" || step.kind === "loadingReflection" || step.kind === "reflection") && (
+          {(step.kind === "mission" ||
+            step.kind === "continuation" ||
+            step.kind === "loadingReflection" ||
+            step.kind === "reflection") && (
             <MissionView mission={step.mission} />
           )}
 
-          {canReport && (
+          {(step.kind === "continuation" || step.kind === "loadingReflection" || step.kind === "reflection") && (
+            <ThreadView exchanges={step.exchanges} />
+          )}
+
+          {(step.kind === "mission" || step.kind === "continuation" || step.kind === "loadingReflection") && (
             <ReportFormView
               value={report}
               loading={step.kind === "loadingReflection"}
+              responseNumber={step.exchanges.length + 1}
               onChange={setReport}
               onSubmit={handleReportSubmit}
             />
           )}
 
-          {completed && (
-            <ReflectionView reflection={step.reflection} report={step.report} onStartAgain={startAgain} />
+          {(step.kind === "mission" || step.kind === "continuation") && (
+            <div className="thread-actions">
+              <button className="secondary" type="button" onClick={startAgain}>Start a new mission</button>
+            </div>
+          )}
+
+          {step.kind === "reflection" && (
+            <ThreadActions
+              responseCount={step.exchanges.length}
+              canContinue={canContinue}
+              finalResponse={finalResponse}
+              onContinue={continueMission}
+              onStartAgain={startAgain}
+            />
           )}
         </div>
 
@@ -162,8 +250,8 @@ export default function Home() {
       <section className="method" aria-labelledby="method-title">
         <h2 id="method-title">How this coach works</h2>
         <p>
-          Moment Coach does not score your speech or give you a pile of techniques. It gives one real-world experiment,
-          then uses your report to compare what fear predicted with what actually happened. Over time, these moments can
+          Moment Coach does not score your speech or give you a pile of techniques. It gives one real-world mission,
+          then uses your reports to compare what fear predicted with what actually happened. Over time, these moments can
           help you notice the urge to check or control speech and become less governed by it.
         </p>
       </section>
@@ -304,66 +392,99 @@ function MissionView({ mission }: { mission: Mission }) {
 function ReportFormView({
   value,
   loading,
+  responseNumber,
   onChange,
   onSubmit
 }: {
   value: string;
   loading: boolean;
+  responseNumber: number;
   onChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
+  const firstReport = responseNumber === 1;
+
   return (
     <form className="flow report" onSubmit={onSubmit}>
+      <p className="response-count">Response {responseNumber + missionThreadLimits.missionResponseCount} of {missionThreadLimits.maxTotalResponses}</p>
       <label>
-        What actually happened?
+        {firstReport ? "What actually happened?" : "Add clarification, disagreement, or another observation"}
         <textarea
           required
           minLength={3}
           maxLength={900}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="Report what you tried, what the other person did, and anything concrete you noticed."
+          placeholder={
+            firstReport
+              ? "Report what you tried, what the other person did, and anything concrete you noticed."
+              : "Add a missing fact, correction, disagreement, relevant question, or another observation from this same speaking moment."
+          }
         />
       </label>
       <button disabled={loading} type="submit">
-        {loading ? "Reading your report..." : "Get evidence and next step"}
+        {loading ? "Reading your update..." : firstReport ? "Get evidence and next step" : "Send continuation"}
       </button>
     </form>
   );
 }
 
-function ReflectionView({
-  reflection,
-  report,
+function ThreadView({ exchanges }: { exchanges: CoachExchange[] }) {
+  if (exchanges.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="thread" aria-label="Mission thread">
+      {exchanges.map((exchange, index) => (
+        <article className="result reflection" key={exchange.id}>
+          <p className="eyebrow">Coach response {index + 2} of {missionThreadLimits.maxTotalResponses}</p>
+          <h2>Evidence from this moment</h2>
+          <blockquote>{exchange.userText}</blockquote>
+          <ul>
+            {exchange.coachResponse.observedEvidence.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <dl>
+            <div>
+              <dt>Useful interpretation</dt>
+              <dd>{exchange.coachResponse.usefulInterpretation}</dd>
+            </div>
+            <div>
+              <dt>One next step</dt>
+              <dd>{exchange.coachResponse.nextStep}</dd>
+            </div>
+          </dl>
+          <p>{exchange.coachResponse.closing}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ThreadActions({
+  responseCount,
+  canContinue,
+  finalResponse,
+  onContinue,
   onStartAgain
 }: {
-  reflection: Reflection;
-  report: string;
+  responseCount: number;
+  canContinue: boolean;
+  finalResponse: boolean;
+  onContinue: () => void;
   onStartAgain: () => void;
 }) {
   return (
-    <article className="result reflection">
-      <p className="eyebrow">Report-back result</p>
-      <h2>Evidence from this moment</h2>
-      <blockquote>{report}</blockquote>
-      <ul>
-        {reflection.observedEvidence.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-      <dl>
-        <div>
-          <dt>Useful interpretation</dt>
-          <dd>{reflection.usefulInterpretation}</dd>
-        </div>
-        <div>
-          <dt>One next step</dt>
-          <dd>{reflection.nextStep}</dd>
-        </div>
-      </dl>
-      <p>{reflection.closing}</p>
-      <button type="button" onClick={onStartAgain}>Start another moment</button>
-    </article>
+    <div className="thread-actions">
+      <p className="response-count">
+        Response {responseCount + missionThreadLimits.missionResponseCount} of {missionThreadLimits.maxTotalResponses}
+      </p>
+      {finalResponse ? <p className="empty">This bounded mission thread is complete.</p> : null}
+      {canContinue ? <button type="button" onClick={onContinue}>Continue this mission</button> : null}
+      <button className="secondary" type="button" onClick={onStartAgain}>Start a new mission</button>
+    </div>
   );
 }
 
@@ -373,7 +494,7 @@ function HistoryPanel({ history, onClear }: { history: HistoryEntry[]; onClear: 
       <div className="history-head">
         <div>
           <p className="eyebrow">Local history</p>
-          <h2>Completed loops</h2>
+          <h2>Mission history</h2>
         </div>
         <button disabled={history.length === 0} type="button" onClick={onClear}>Clear</button>
       </div>
@@ -386,7 +507,8 @@ function HistoryPanel({ history, onClear }: { history: HistoryEntry[]; onClear: 
               <time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleString()}</time>
               <strong>{entry.situationSummary}</strong>
               <span>{entry.mission.title}</span>
-              <span>Next: {entry.reflection.nextStep}</span>
+              <span>{entry.responseCount + missionThreadLimits.missionResponseCount} of {missionThreadLimits.maxTotalResponses} total coach responses used</span>
+              {entry.thread.at(-1) ? <span>Next: {entry.thread.at(-1)?.coachResponse.nextStep}</span> : null}
             </li>
           ))}
         </ul>
