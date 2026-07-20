@@ -64,8 +64,18 @@ describe("Moment Coach UI", () => {
         "Each mission is deliberately bounded: one mission, up to three report-backs, then a clear close. You can start a new mission at any time."
       )
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "How this coach works" })).toBeInTheDocument();
-    expect(screen.getByText(/does not score your speech or give you a pile of techniques/i)).toBeInTheDocument();
+    expect(screen.getByText("Built with GPT-5.6 and Codex.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "The direction" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "This coach is not trying to make every sentence perfect, and it will not score your speech or hand you a pile of techniques. It helps you notice the loop that can make speaking feel high-stakes: checking, predicting, controlling, correcting, avoiding, and reacting to your speech."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "The direction" }).compareDocumentPosition(
+        screen.getByRole("heading", { name: "Mission history" })
+      ) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
 
     await user.type(screen.getByLabelText(/upcoming speaking situation/i), "I will give a short project update.");
     await user.type(screen.getByLabelText(/who will you speak with/i), "My team");

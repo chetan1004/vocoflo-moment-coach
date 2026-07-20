@@ -179,6 +179,7 @@ export default function Home() {
       <section className="intro">
         <div>
           <p className="eyebrow">OpenAI Build Week 2026 beta</p>
+          <p className="disclaimer">Built with GPT-5.6 and Codex.</p>
           <h1>VocoFlo Moment Coach</h1>
           <p className="audience">Real-world speaking coaching for people who stutter.</p>
           <p className="lede">
@@ -246,18 +247,22 @@ export default function Home() {
             />
           )}
         </div>
-
-        <HistoryPanel history={history} onClear={handleClearHistory} />
       </section>
 
-      <section className="method" aria-labelledby="method-title">
-        <h2 id="method-title">How this coach works</h2>
+      <section className="method" aria-labelledby="direction-title">
+        <h2 id="direction-title">The direction</h2>
         <p>
-          Moment Coach does not score your speech or give you a pile of techniques. It gives one real-world mission,
-          then uses your reports to compare what fear predicted with what actually happened. Over time, these moments can
-          help you notice the urge to check or control speech and become less governed by it.
+          This coach is not trying to make every sentence perfect, and it will not score your speech or hand you a pile of techniques. It helps you notice the loop that can make speaking feel high-stakes: checking, predicting, controlling, correcting, avoiding, and reacting to your speech.
+        </p>
+        <p>
+          The coach moves you forward through your own evidence. One real speaking moment at a time, it helps you compare what fear predicted with what actually happened, notice whether you continued and how the listener responded, and gradually become less governed by the urge to monitor every word.
+        </p>
+        <p className="disclaimer">
+          In the larger VocoFlo journey, this observing-and-checking movement is later called &apos;the watcher&apos; — after you have begun to recognise it for yourself.
         </p>
       </section>
+
+      <HistoryPanel history={history} onClear={handleClearHistory} />
     </main>
   );
 }
