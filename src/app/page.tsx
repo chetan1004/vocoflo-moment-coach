@@ -186,6 +186,9 @@ export default function Home() {
             predicted with what actually happened and take one next step.
           </p>
           <p className="disclaimer">
+            Each mission is deliberately bounded: one mission, up to three report-backs, then a clear close. You can start a new mission at any time.
+          </p>
+          <p className="disclaimer">
             Educational speaking coaching only. This beta does not diagnose, treat, cure, record speech, or assess medical conditions.
           </p>
         </div>

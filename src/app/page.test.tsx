@@ -59,6 +59,11 @@ describe("Moment Coach UI", () => {
     render(<Home />);
 
     expect(screen.getByText("Real-world speaking coaching for people who stutter.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Each mission is deliberately bounded: one mission, up to three report-backs, then a clear close. You can start a new mission at any time."
+      )
+    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "How this coach works" })).toBeInTheDocument();
     expect(screen.getByText(/does not score your speech or give you a pile of techniques/i)).toBeInTheDocument();
 
