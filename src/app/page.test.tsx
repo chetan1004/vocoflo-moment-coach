@@ -65,6 +65,11 @@ describe("Moment Coach UI", () => {
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Built with GPT-5.6 and Codex.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "GPT-5.6 provides adaptive reasoning and language. VocoFlo supplies the coaching method: bounded missions, evidence rules, response limits, and a clear direction, so the model guides one real speaking moment instead of drifting into open-ended chat."
+      )
+    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "The direction" })).toBeInTheDocument();
     expect(
       screen.getByText(

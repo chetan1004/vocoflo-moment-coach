@@ -180,6 +180,9 @@ export default function Home() {
         <div>
           <p className="eyebrow">OpenAI Build Week 2026 beta</p>
           <p className="disclaimer">Built with GPT-5.6 and Codex.</p>
+          <p className="disclaimer">
+            GPT-5.6 provides adaptive reasoning and language. VocoFlo supplies the coaching method: bounded missions, evidence rules, response limits, and a clear direction, so the model guides one real speaking moment instead of drifting into open-ended chat.
+          </p>
           <h1>VocoFlo Moment Coach</h1>
           <p className="audience">Real-world speaking coaching for people who stutter.</p>
           <p className="lede">
